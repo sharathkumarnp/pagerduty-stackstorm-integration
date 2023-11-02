@@ -1,0 +1,12 @@
+---
+name: "st2-actions-ec2-node-trigger"
+description: "Simple Action Chain workflow for  ec2 node draining alert"
+pack: "pd"
+runner_type: "action-chain"
+entry_point: "chains/st2-chains-ec2-node-trigger.yaml"
+enabled: true
+parameters:
+  incident_id:
+    type: string
+    description: "incident id"
+    required: true

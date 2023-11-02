@@ -1,0 +1,85 @@
+---
+chain:
+  -
+    name: "incident_find"
+    ref: "core.local"
+    parameters:
+      cmd: "echo \"{{triggers}}\""
+    on-success: "pd_ack_incident"
+  -
+    name: "pd_ack_incident"
+    ref: "pagerduty.incident.acknowledge"
+    parameters:
+      from_email: "stackstormsvcaccount@jfrog.com"
+      entity_id: "{{incident_find.stdout}}"
+    on-success: "pd_get_incident"
+  -
+    name: "pd_get_incident"
+    ref: "pagerduty.incident.get"
+    parameters:
+      entity_id: "{{incident_find.stdout}}"
+    on-success: "pd_get_instanceid"
+  -
+    name: "pd_get_instanceid"
+    ref: "core.local"
+    parameters:
+      cmd: "set -f;echo \"{{pd_get_incident.result.title}}\" | awk {'print $9'}"
+    on-success: "pd_get_regionname"
+  -
+    name: "pd_get_regionname"
+    ref: "core.local"
+    parameters:
+      cmd: "set -f;echo \"{{pd_get_incident.result.title}}\" | awk {'print $12'}"
+    on-success: "pd_run_script"
+  -
+    name: "pd_run_script"
+    ref: "pd.st2-actions-aws-ec2-node-script"
+    parameters:
+      instance_id: "{{pd_get_instanceid.stdout}}"
+      region_name: "{{pd_get_regionname.stdout}}"
+    on-success: "pd_update_incident"
+  -
+    name: "pd_update_incident"
+    ref: "pagerduty.incident.create_note"
+    parameters:
+      from_email: "stackstormsvcaccount@jfrog.com"
+      entity_id: "{{incident_find.stdout}}"
+      content: "{{pd_run_script.stdout}}"
+    on-success: "pd_oncall_find"
+
+  -
+    name: "pd_oncall_find"
+    ref: "pagerduty.on_call.find"
+    parameters:
+      escalation_policy_ids: ['your-escalation-id'] #Provide your ID here
+    on-success: "pd_find_user"
+  -
+    name: "pd_find_user"
+    ref: "core.local"
+    parameters:
+      cmd: "echo \"{{pd_oncall_find.result[1].user.id}}\""
+    on-success: "pd_reassign_incident"
+  -
+    name: "pd_reassign_incident"
+    ref: "pagerduty.incident.reassign"
+    parameters:
+      from_email: "stackstormsvcaccount@jfrog.com"
+      entity_id: "{{incident_find.stdout}}"
+      user_ids:
+        - "{{pd_find_user.stdout}}"
+    on-success: "pd_notify_slack"
+    on-failure: "pd_failure_notify_slack"
+  -
+    name: "pd_notify_slack"
+    ref: "slack.post_message"
+    parameters:
+      webhook_url: "{{ st2kv.system.slackwebhookurl }}"
+      username: "my-bot"
+      message: "Incident \"{{incident_find.stdout}}\" Instances - \"{{pd_get_instanceid.stdout}}\" is found"
+
+  - name: "pd_failure_notify_slack"
+    ref: "slack.post_message"
+    parameters:
+      webhook_url: "{{ st2kv.system.slackwebhookurl }}"
+      username: "my-bot"
+      message: "Incident \"{{incident_find.stdout}}\" Instance - \"{{pd_get_instanceid.stdout}}\" failed to get Node name"

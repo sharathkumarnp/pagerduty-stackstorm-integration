@@ -1,0 +1,20 @@
+---
+name: "st2-rules-ec2-node-trigger"
+pack: "pd"
+description: "Rule for node draining"
+enabled: true
+
+trigger:
+  type: "core.st2.webhook"
+  parameters:
+    url: "pdtrigger"
+
+criteria:
+  trigger.body.summary:
+    type: "contains"
+    pattern: "Retirement"
+
+action:
+  ref: "pd.st2-actions-ec2-node-trigger"
+  parameters:
+    incident_id: "{{ trigger.body.__pd_metadata.incident.id }}"
