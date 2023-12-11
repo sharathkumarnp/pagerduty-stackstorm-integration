@@ -19,24 +19,28 @@ The run method is the entry point for the script and is expected to be executed 
 # Helper Methods:
 The EC2Action class includes several helper methods to perform specific tasks:
 
-get_statefulset_name: This method extracts the name of the StatefulSet that controls a given pod in a specified namespace by running the kubectl describe command.
+* **_find_instance_id_in_subclusters:_** Searches for the EC2 instance in subclusters when not found in the primary cluster.
 
-get_original_replicas: It retrieves the original replica count specified in a StatefulSet's specification in a given namespace.
 
-find_node_in_cluster: This method searches for a specific AWS instance ID within annotations of nodes within a Kubernetes cluster. It then calls the cordon_node method if the instance ID is found.
+* _**find_node_and_cordon:**_ Uses kubectl to find the node where the EC2 instance is running and marks it as unschedulable.
 
-cordon_node: This method "cordons" a Kubernetes node, meaning it prevents new pods from being scheduled on that node. After cordoning the node, it identifies all pods running on that node, filters out DaemonSet pods, and gets the StatefulSet names associated with those pods. It then scales and restarts StatefulSets and restarts pods as needed.
 
-scale_and_restart_statefulset: This method scales up a StatefulSet by increasing the replica count by one and initiates a rolling restart. After the restart, it waits for the pods to initialize and then scales down the StatefulSet to its original replica count.
+* **_cordon_node:_** Marks a Kubernetes node as unschedulable and restarts related pods.
 
-scale_down_sts: This method scales down a StatefulSet to its original replica count in a specified namespace.
 
-restart_pod: It restarts a pod by deleting it in a specified namespace. This is done for pods with a replica count less than 2.
+* **_sts_name:_** Determines the StatefulSet name for pods related to Artifactory or Xray.
 
-restart_pods_on_node: This method restarts pods on a node either by scaling and restarting StatefulSets (for pods with more than 2 replicas) or simply restarting pods (for pods with fewer than 2 replicas).
+
+* **_scale_and_restart:_** Scales and restarts a StatefulSet in a specified namespace.
+
+
+* **_restart_pod:_** Deletes a pod to trigger a restart.
 
 # Multiprocessing:
 The code employs the multiprocessing module to parallelize certain operations, such as scaling and restarting StatefulSets and restarting pods. This can help improve the efficiency of the script when dealing with multiple pods.
+
+
+Please note that this script is designed to be used as a part of StackStorm workflows or actions and relies on the StackStorm environment and conventions. It interacts with Kubernetes clusters using kubectl and the StackStorm SDM (Service Deployment Manager) tool for Kubernetes. The script also assumes certain configurations and paths specific to the StackStorm environment.
 
 # Notes:
 

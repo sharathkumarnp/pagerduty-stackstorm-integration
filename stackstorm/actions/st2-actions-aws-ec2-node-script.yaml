@@ -4,7 +4,7 @@ pack: pd
 description: "EC2 Node Draining"
 runner_type: "python-script"
 enabled: true
-entry_point: ec2_node_script.py
+entry_point: ec2_node_script_noAPI.py  # provide the actual script name
 parameters:
   instance_id:
     type: string
