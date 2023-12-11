@@ -40,8 +40,6 @@ The EC2Action class includes several helper methods to perform specific tasks:
 The code employs the multiprocessing module to parallelize certain operations, such as scaling and restarting StatefulSets and restarting pods. This can help improve the efficiency of the script when dealing with multiple pods.
 
 
-Please note that this script is designed to be used as a part of StackStorm workflows or actions and relies on the StackStorm environment and conventions. It interacts with Kubernetes clusters using kubectl and the StackStorm SDM (Service Deployment Manager) tool for Kubernetes. The script also assumes certain configurations and paths specific to the StackStorm environment.
-
 # Notes:
 
 1. This script is designed for a specific use case and is expected to run in an environment with the necessary Kubernetes and StackStorm configurations.
@@ -57,3 +55,5 @@ Please note that this script is designed to be used as a part of StackStorm work
 6. The script assumes that you have the kubectl command-line tool configured on the machine where it's running.
 
 If you have specific questions or need further details about any part of the code, please let me know.
+
+#### **For Further reference I've included a test python file which helps to run directly over your local bash terminal**
