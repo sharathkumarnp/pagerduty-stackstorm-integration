@@ -10,7 +10,7 @@ chain:
     name: "pd_ack_incident"
     ref: "pagerduty.incident.acknowledge"
     parameters:
-      from_email: "stackstormsvcaccount@jfrog.com"
+      from_email: "<your-email>"
       entity_id: "{{incident_find.stdout}}"
     on-success: "pd_get_incident"
   -
@@ -42,7 +42,7 @@ chain:
     name: "pd_update_incident"
     ref: "pagerduty.incident.create_note"
     parameters:
-      from_email: "stackstormsvcaccount@jfrog.com"
+      from_email: "<your-email>"
       entity_id: "{{incident_find.stdout}}"
       content: "{{pd_run_script.stdout}}"
     on-success: "pd_oncall_find"
@@ -63,7 +63,7 @@ chain:
     name: "pd_reassign_incident"
     ref: "pagerduty.incident.reassign"
     parameters:
-      from_email: "stackstormsvcaccount@jfrog.com"
+      from_email: "<your-email>"
       entity_id: "{{incident_find.stdout}}"
       user_ids:
         - "{{pd_find_user.stdout}}"
@@ -73,13 +73,13 @@ chain:
     name: "pd_notify_slack"
     ref: "slack.post_message"
     parameters:
-      webhook_url: "{{ st2kv.system.slackwebhookurl }}"
+      webhook_url: "{{ your-slackwebhookurl }}"
       username: "my-bot"
-      message: "Incident \"{{incident_find.stdout}}\" Instances - \"{{pd_get_instanceid.stdout}}\" is found"
+      message: "<<Print your message>>"
 
   - name: "pd_failure_notify_slack"
     ref: "slack.post_message"
     parameters:
-      webhook_url: "{{ st2kv.system.slackwebhookurl }}"
+      webhook_url: "{{ your-slackwebhookurl }}"
       username: "my-bot"
-      message: "Incident \"{{incident_find.stdout}}\" Instance - \"{{pd_get_instanceid.stdout}}\" failed to get Node name"
+      message: "Incident details << Print what you want here >>"
